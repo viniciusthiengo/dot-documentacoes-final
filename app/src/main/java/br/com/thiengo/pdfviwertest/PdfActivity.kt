@@ -1,12 +1,12 @@
 package br.com.thiengo.pdfviwertest
 
-import android.graphics.Canvas
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import br.com.thiengo.pdfviwertest.domain.Doc
-import com.github.barteksc.pdfviewer.listener.*
+import com.github.barteksc.pdfviewer.listener.OnPageChangeListener
+import com.github.barteksc.pdfviewer.listener.OnRenderListener
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle
 import kotlinx.android.synthetic.main.activity_pdf.*
 
@@ -14,11 +14,7 @@ import kotlinx.android.synthetic.main.activity_pdf.*
 class PdfActivity :
         AppCompatActivity(),
         OnPageChangeListener,
-        OnLoadCompleteListener,
-        OnRenderListener,
-        OnPageScrollListener,
-        OnDrawListener,
-        OnErrorListener {
+        OnRenderListener{
 
     var doc: Doc? = null
     var toolbar: Toolbar? = null
@@ -32,33 +28,72 @@ class PdfActivity :
         getSupportActionBar()?.setDisplayHomeAsUpEnabled(true)
         getSupportActionBar()?.setDisplayShowHomeEnabled(true)
 
-        doc = intent.getParcelableExtra(Doc.DOC_KEY)
+        doc = intent.getParcelableExtra( Doc.DOC_KEY )
 
-        // PERMISSÃO EM TEMO DE EXECUÇÃO E NO ANDROIDMANIFEST SERÁ NECESSÁRIA
-        //val file = File(Environment.getExternalStorageDirectory(), "DCIM/${doc?.path}")
-        //Log.i("Log", "${Environment.getExternalStorageDirectory()} - ${file.path}");
+        //val file = File(Environment.getExternalStorageDirectory(), doc?.path)
 
         pdfView
-            //.fromUri( Uri.fromFile( file ) )
             //.fromFile(file)
             .fromAsset( doc?.path )
-            .defaultPage( doc?.getActualPageSP(this) ?: 0 )
-            .onPageChange(this)
+
+            /*
+             * Permite a definição da página que será carregada inicialmente.
+             * A contagem inicia em 0.
+             * */
+            .defaultPage( doc?.getActualPage(this) ?: 0 )
+
+            /*
+             * Caso um ScrollHandle seja definido, a numeração da página estará
+             * presente na tela para que o usuário saiba em qual página está,
+             * isso sem necessidade de dar o zoom nela. É possível implementar
+             * o seu próprio ScrollHandle, mas a API também já fornece uma
+             * implementação que tem como parâmetro um objeto de contexto,
+             * DefaultScrollHandle.
+             * */
+            .scrollHandle( DefaultScrollHandle(this) )
+
+            /*
+             * Se definido como false, o usuário não conseguirá mudar de página.
+             * */
+            .enableSwipe(true)
+
+            /*
+             * Por padrão o swipe é vertical, ou seja, as próximas páginas estão
+             * abaixo no scroll. Com swipeHorizontal() recebendo true o swipe
+             * passa a ser horizontal, onde a próxima página é a que está a direita.
+             * */
+            .swipeHorizontal(true)
+
+            /*
+             * Útil para PDFs que necessitam de senha para serem visualizados.
+             * */
+            .password(null)
+
+            /*
+             * Caso true, permite que os níveis de zoom (min, middle, max) também
+             * seja acionados caso o usuário dê touchs na tela do device.
+             * */
+            .enableDoubletap(true)
+
+            /*
+             * Caso true, permite que anotações e comentários, extra PDF original,
+             * sejam apresentados.
+             * */
             .enableAnnotationRendering(true)
-            .onLoad(this)
-            .scrollHandle( DefaultScrollHandle(this) ) // PARA APRESENTAÇÃO DO NÚMERO DE PÁGINA NA TELA
-            .enableSwipe(true) // CASO QUEIRA BLOQUEAR A MUDANÇA DE PÁGINA, COLOQUE false AQUI
-            .swipeHorizontal(true) // O PADRÃO É O SWIPE VERTICAL
-            .enableDoubletap(true) // PARA BLOQUEAR O ZOOM COM TOUCHES, COLOQUE false AQUI
-            .enableAntialiasing(true) // MELHORA RENDERIZAÇÃO EM TELAS PEQUENAS
-            .enableAnnotationRendering(true) // RENDERIZA TAMBÉM DADOS DE ANOTAÇÃO (MARCAÇÕES E COMENTÁRIOS, POR EXEMPLO)
+
+            /*
+             * Caso true, permite que haja otimização de renderização em telas
+             * menores.
+             * */
+            .enableAntialiasing(true)
+
+            .onPageChange(this)
             .onRender(this)
-            //.pages(0, 1, 120) // CASO SEJA NECESSÁRIO DEFINIR AS PÁGINAS LIBERADAS, COLOQUE AS NUMERAÇÕES DELAS AQUI, INICIANDO DE 0
-            .onPageScroll(this)
-            //.password(null) // PARA QUANDO O PDF TEM SENHA DE ACESSO
-            .onDraw(this) // PERMITE O DESENHO DE ALGO NA PÁGINA ATUAL
-            .onError(this)
-            .load();
+            .load()
+
+        /*pdfView.setMinZoom(1F)
+        pdfView.setMidZoom(1.75F)
+        pdfView.setMaxZoom(6F)*/
     }
 
     override fun onResume() {
@@ -75,37 +110,11 @@ class PdfActivity :
         return super.onOptionsItemSelected(item)
     }
 
-
-
-    override fun loadComplete(nbPages: Int) {
-        //Log.i("log_data", "loadComplete($nbPages)");
-    }
-
     override fun onPageChanged(page: Int, pageCount: Int) {
-        //Log.i("log_data", "onPageChanged($page, $pageCount) ${doc?.getActualPageSP(this) ?: 0}");
-        doc?.saveActualPageSP(this, page)
+        doc?.saveActualPage(this, page)
     }
 
     override fun onInitiallyRendered(nbPages: Int, pageWidth: Float, pageHeight: Float) {
-        //Log.i("log_data", "onInitiallyRendered($nbPages, $pageWidth, $pageHeight)");
-        pdfView.fitToWidth( doc?.getActualPageSP(this) ?: 0 )
-    }
-
-    override fun onPageScrolled(page: Int, positionOffset: Float) {
-        //Log.i("log_data", "onPageScrolled($page, $positionOffset)");
-    }
-
-    override fun onLayerDrawn(canvas: Canvas?, pageWidth: Float, pageHeight: Float, displayedPage: Int) {
-        //Log.i("log_data", "onLayerDrawn($pageWidth, $pageHeight, $displayedPage)");
-
-        /*val myPaint = Paint()
-        myPaint.setColor(Color.RED)
-        myPaint.setStyle(Paint.Style.STROKE)
-        myPaint.setStrokeWidth(3F)
-        canvas?.drawRect(20F, 20F, 100F, 100F, myPaint)*/
-    }
-
-    override fun onError(t: Throwable?) {
-        //Log.i("log_data", "onError($t)");
+        pdfView.fitToWidth( doc?.getActualPage(this) ?: 0 )
     }
 }

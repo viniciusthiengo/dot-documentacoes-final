@@ -12,13 +12,12 @@ class Doc(
         val language: String,
         val pagesNumber: Int) : Parcelable {
 
-
-    fun saveActualPageSP(context: Context, page: Int ){
+    fun saveActualPage(context: Context, page: Int ){
         Database.saveActualPageSP(context, path, page)
     }
 
-    fun getActualPageSP(context: Context, plusPage: Int = 0) = Database.getActualPageSP(context, path) + plusPage
-
+    fun getActualPage(context: Context, plusPage: Int = 0 )
+        = Database.getActualPageSP(context, path) + plusPage
 
     companion object {
         @JvmField val DOC_KEY = "doc"

@@ -14,7 +14,7 @@ class Database {
                 Doc("scala-docs.pdf", R.drawable.scala_bg, "Scala", 547)
             )
 
-        fun saveActualPageSP(context: Context, key: String, page: Int ){
+        fun saveActualPageSP( context: Context, key: String, page: Int ){
             context
                 .getSharedPreferences("PREF", Context.MODE_PRIVATE)
                 .edit()
@@ -22,9 +22,11 @@ class Database {
                 .apply()
         }
 
-        fun getActualPageSP(context: Context, key: String)
+        fun getActualPageSP( context: Context, key: String )
             = context
-                .getSharedPreferences("PREF", Context.MODE_PRIVATE)
-                .getInt("$key-page", 0)
+                    .getSharedPreferences("PREF", Context.MODE_PRIVATE)
+                    .getInt("$key-page", 0)
+
     }
 }
+

@@ -45,11 +45,11 @@ class DocAdapter(
         var tvPageStopped: TextView
 
         init {
+            itemView.setOnClickListener(this)
             ivCover = itemView.findViewById(R.id.iv_cover)
             tvLanguage = itemView.findViewById(R.id.tv_language)
             tvTotalPages = itemView.findViewById(R.id.tv_total_pages)
             tvPageStopped = itemView.findViewById(R.id.tv_page_stopped)
-            itemView.setOnClickListener(this)
         }
 
         fun setData(doc: Doc) {
@@ -57,8 +57,8 @@ class DocAdapter(
             tvLanguage.text = doc.language
             tvTotalPages.text = "${doc.pagesNumber} páginas"
 
-            tvPageStopped.visibility = if( doc.getActualPageSP(context) > 0 ){
-                    tvPageStopped.text = "Parou na página ${doc.getActualPageSP(context, 1)}"
+            tvPageStopped.visibility = if( doc.getActualPage(context) > 0 ){
+                    tvPageStopped.text = "Parou na página ${doc.getActualPage(context, 1)}"
                     View.VISIBLE
                 }
                 else{
@@ -68,8 +68,8 @@ class DocAdapter(
 
         override fun onClick(view: View?) {
             val intent = Intent(context, PdfActivity::class.java)
-            intent.putExtra(Doc.DOC_KEY, docList.get(adapterPosition))
-            context.startActivity(intent)
+            intent.putExtra( Doc.DOC_KEY, docList.get( adapterPosition ) )
+            context.startActivity( intent )
         }
     }
 }
