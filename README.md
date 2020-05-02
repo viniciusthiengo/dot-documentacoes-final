@@ -1,4 +1,4 @@
-# Dot.Documentações (Kotlin Android)
+# Dot.Documentações - Finalizado (Kotlin Android)
 
 Projeto Kotlin Android da segunda parte do artigo [PDF no Android](https://www.thiengo.com.br/pdf-no-android#title-06) do Blog [Thiengo.com.br](https://www.thiengo.com.br).
 
